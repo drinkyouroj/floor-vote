@@ -110,9 +110,32 @@ export function PartySlider({ party, value, onChange, disabled }: PartySliderPro
           step={1}
           value={value}
           disabled={disabled}
-          onChange={(e) => { onChange(Number(e.target.value)); playTick() }}
+          onChange={(e) => {
+            const next = Number(e.target.value)
+            if (next === value) return
+            onChange(next)
+            playTick()
+            if (
+              next % 5 === 0 &&
+              typeof navigator !== "undefined" &&
+              typeof navigator.vibrate === "function"
+            ) {
+              navigator.vibrate(8)
+            }
+          }}
           className={`party-slider-${party} block w-full`}
         />
+
+        {/* Ratchet notches at 0/25/50/75/100% — sit on top of the track, under the thumb glow */}
+        <div className="pointer-events-none absolute inset-0">
+          {[0, 25, 50, 75, 100].map((pct) => (
+            <div
+              key={pct}
+              className="absolute top-1/2 w-0.5 h-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/30"
+              style={{ left: `${pct}%` }}
+            />
+          ))}
+        </div>
       </div>
 
       <div className="flex justify-between text-xs text-zinc-600 select-none">
