@@ -1,9 +1,10 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useRef, useState, useCallback } from "react"
 import { motion } from "framer-motion"
 import { TrendingUp, Target, ChevronRight } from "lucide-react"
 import { getScoreLabel } from "@/lib/scoring"
+import { useSfx } from "@/hooks/useSfx"
 import type { Vote } from "@/lib/types"
 
 interface PartyResultRowProps {
@@ -134,6 +135,36 @@ export function ScoreReveal({
   const displayScore = useCountUp(score, 0.8)
   const displayTotal = useCountUp(totalScore, 1.0)
   const { label, color } = getScoreLabel(score)
+
+  const playSwoosh = useSfx("revealSwoosh")
+  const playCoin = useSfx("coinTick")
+  const playFanfare = useSfx("uncannyFanfare")
+
+  // Reveal bars swoosh on mount
+  useEffect(() => {
+    playSwoosh()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // Coin tick rattles during the 1s count-up animation (starts at 0.8s delay)
+  useEffect(() => {
+    let interval: ReturnType<typeof setInterval>
+    let stop: ReturnType<typeof setTimeout>
+    const start = setTimeout(() => {
+      interval = setInterval(playCoin, 80)
+      stop = setTimeout(() => clearInterval(interval), 1100)
+    }, 800)
+    return () => { clearTimeout(start); clearInterval(interval); clearTimeout(stop) }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [score])
+
+  // Fanfare fires after count-up completes, only for Uncanny scores
+  useEffect(() => {
+    if (label !== "Uncanny") return
+    const timeout = setTimeout(playFanfare, 1950)
+    return () => clearTimeout(timeout)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [score, label])
 
   return (
     <motion.div
