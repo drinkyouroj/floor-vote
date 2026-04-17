@@ -7,6 +7,7 @@ import { VoteCard } from "@/components/game/VoteCard"
 import { PartySlider } from "@/components/game/PartySlider"
 import { ScoreReveal } from "@/components/game/ScoreReveal"
 import { SessionStats } from "@/components/game/SessionStats"
+import { useSfx } from "@/hooks/useSfx"
 import { calculateScore } from "@/lib/scoring"
 import { simulatePercentileBeat } from "@/lib/simulation"
 import { allVotes, shuffleVotes } from "@/lib/votes"
@@ -75,6 +76,7 @@ export default function FloorVotePage() {
   const [session, setSession] = useState({ totalScore: 0, highScore: 0, gamesPlayed: 0 })
   const [showHowTo, setShowHowTo] = useState(false)
   const sessionSeed = useRef(Date.now())
+  const playThunk = useSfx("submitThunk")
 
   const shuffledVotes = useMemo(
     () => shuffleVotes(allVotes, sessionSeed.current),
@@ -92,6 +94,7 @@ export default function FloorVotePage() {
   }, [])
 
   const handleSubmit = useCallback(() => {
+    playThunk()
     const score = calculateScore(
       demGuess,
       repGuess,
@@ -118,7 +121,7 @@ export default function FloorVotePage() {
       gamesPlayed: updated.gamesPlayed,
     })
     setPhase("revealed")
-  }, [demGuess, repGuess, currentVote])
+  }, [demGuess, repGuess, currentVote, playThunk])
 
   const handleNext = useCallback(() => {
     setVoteIndex((i) => i + 1)

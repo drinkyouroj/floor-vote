@@ -2,6 +2,7 @@
 
 import { Slider as SliderPrimitive } from "@base-ui/react/slider"
 import { motion } from "framer-motion"
+import { useSfx } from "@/hooks/useSfx"
 
 interface PartySliderProps {
   party: "dem" | "rep"
@@ -30,6 +31,7 @@ const PARTY_CONFIG = {
 export function PartySlider({ party, value, onChange, disabled }: PartySliderProps) {
   const config = PARTY_CONFIG[party]
   const isDem = party === "dem"
+  const playTick = useSfx("sliderTick")
 
   return (
     <div className="space-y-3">
@@ -108,7 +110,7 @@ export function PartySlider({ party, value, onChange, disabled }: PartySliderPro
           step={1}
           value={value}
           disabled={disabled}
-          onChange={(e) => onChange(Number(e.target.value))}
+          onChange={(e) => { onChange(Number(e.target.value)); playTick() }}
           className={`party-slider-${party} block w-full`}
         />
       </div>
